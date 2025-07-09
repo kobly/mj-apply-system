@@ -1,12 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function InternetApplyForm() {
   const [isCorp, setIsCorp] = useState(false);
+  const router = useRouter();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    router.push("/apply/internet/product");
+  };
 
   return (
-    <form className="space-y-8 p-6">
+    <form onSubmit={handleSubmit} className="space-y-8 p-6">
       <section className="space-y-4 border p-4 rounded-md">
         <h2 className="text-lg font-semibold">고객 정보</h2>
         <div className="flex gap-4 items-center">
