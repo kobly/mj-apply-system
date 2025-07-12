@@ -2,9 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
+  const router = useRouter();
+
   const isAdmin = true;
   const imageUrl = "/promotion-demo.jpg";
 
@@ -42,7 +45,12 @@ export default function HomePage() {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <Button className="w-full h-20 text-base">인터넷 접수</Button>
+        <Button
+          className="w-full h-20 text-base"
+          onClick={() => router.push("/apply/internet")}
+        >
+          인터넷 접수
+        </Button>
         <Button className="w-full h-20 text-base">렌탈 접수</Button>
         <Button className="w-full h-20 text-base">CCTV 접수</Button>
         <Button className="w-full h-20 text-base">유심 접수</Button>
