@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
+import { banks } from "@/data/banks";
+import { cards } from "@/data/cards";
+import { carriers } from "@/data/carriers";
 export default function InternetApplyForm() {
   const router = useRouter();
 
@@ -12,15 +14,72 @@ export default function InternetApplyForm() {
   const [payType, setPayType] = useState<"card" | "bank" | null>(null);
 
   const [customerName, setCustomerName] = useState("");
-  const [customerRRN, setCustomerRRN] = useState("");
+  const [customerRRNFront, setCustomerRRNFront] = useState("");
+  const [customerRRNBack, setCustomerRRNBack] = useState("");
 
   const [accountName, setAccountName] = useState("");
-  const [accountRRN, setAccountRRN] = useState("");
   const [accountBank, setAccountBank] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
 
+  const [giftAccountName, setGiftAccountName] = useState("");
+
+  const [giftAccountRRN, setGiftAccountRRN] = useState("");
+  const [giftAccountBank, setGiftAccountBank] = useState("");
+  const [giftAccountNumber, setGiftAccountNumber] = useState("");
+
   const [sameAsCustomer, setSameAsCustomer] = useState(false);
   const [sameAsAutoPay, setSameAsAutoPay] = useState(false);
+
+  const [postcode, setPostcode] = useState("");
+  const [roadAddress, setRoadAddress] = useState("");
+  const [detailAddress, setDetailAddress] = useState("");
+
+  const openPostcode = () => {
+    new window.daum.Postcode({
+      oncomplete: function (data: any) {
+        setPostcode(data.zonecode);
+        setRoadAddress(data.roadAddress);
+      },
+    }).open();
+  };
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src =
+      "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    if (sameAsCustomer) {
+      setGiftAccountName(customerName);
+      setGiftAccountRRN(`${customerRRNFront}${customerRRNBack}`);
+    } else if (sameAsAutoPay) {
+      setGiftAccountName(accountName);
+      setGiftAccountBank(accountBank);
+      setGiftAccountNumber(accountNumber);
+    }
+  }, [
+    sameAsCustomer,
+    sameAsAutoPay,
+    customerName,
+    customerRRNFront,
+    customerRRNBack,
+    accountName,
+    accountBank,
+    accountNumber,
+  ]);
+
+  const handleSameAsCustomer = (checked: boolean) => {
+    setSameAsCustomer(checked);
+    if (checked) setSameAsAutoPay(false);
+  };
+
+  const handleSameAsAutoPay = (checked: boolean) => {
+    setSameAsAutoPay(checked);
+    if (checked) setSameAsCustomer(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,43 +87,152 @@ export default function InternetApplyForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 p-6">
-      <section className="space-y-4 border p-4 rounded-md">
-        <h2 className="text-lg font-semibold">고객 정보</h2>
-        <div className="flex gap-4 items-center">
-          {["개인", "개인사업자", "법인사업자"].map((type) => (
-            <label key={type} className="flex gap-2">
+    <form onSubmit={handleSubmit} className="space-y-8 p-6 w-1/2 m-auto">
+      <div className="flex gap-4">
+        {["개인", "개인사업자", "법인사업자"].map((type) => (
+          <label key={type} className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="custType"
+              checked={custType === type}
+              onChange={() => setCustType(type as any)}
+            />
+            {type}
+          </label>
+        ))}
+      </div>
+
+      {custType === "개인" && (
+        <section className="border p-6 rounded space-y-4">
+          <h2 className="text-lg font-semibold">개인 고객 정보</h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="고객명"
+              className="input"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+            />
+
+            <div className="grid grid-cols-2 gap-2">
               <input
-                type="radio"
-                name="custType"
-                checked={custType === type}
-                onChange={() => setCustType(type as any)}
+                type="text"
+                placeholder="주민번호 앞자리"
+                pattern="\d{6}"
+                maxLength={6}
+                className="input"
+                value={customerRRNFront}
+                onChange={(e) => setCustomerRRNFront(e.target.value)}
               />
-              {type}
-            </label>
-          ))}
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            placeholder="고객명"
-            className="input"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="주민번호"
-            className="input"
-            value={customerRRN}
-            onChange={(e) => setCustomerRRN(e.target.value)}
-          />
-          <input type="text" placeholder="설치주소" className="input" />
-          <input type="text" placeholder="상세주소" className="input" />
-          <input type="text" placeholder="연락처" className="input" />
-          <input type="email" placeholder="Email" className="input" />
-        </div>
-      </section>
+              <input
+                type="password"
+                placeholder="주민번호 뒷자리"
+                pattern="\d{7}"
+                maxLength={7}
+                inputMode="numeric"
+                className="input"
+                value={customerRRNBack}
+                onChange={(e) => setCustomerRRNBack(e.target.value)}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 col-span-2">
+              <input
+                type="text"
+                placeholder="우편번호"
+                className="input"
+                value={postcode}
+                readOnly
+              />
+              <button
+                type="button"
+                onClick={openPostcode}
+                className="bg-gray-200 rounded px-4 text-sm"
+              >
+                주소 검색
+              </button>
+            </div>
+
+            <input
+              type="text"
+              placeholder="도로명 주소"
+              className="input col-span-2"
+              value={roadAddress}
+              readOnly
+            />
+
+            <input
+              type="text"
+              placeholder="상세주소"
+              className="input col-span-2"
+              value={detailAddress}
+              onChange={(e) => setDetailAddress(e.target.value)}
+            />
+
+            <select className="input">
+              <option>통신사 선택</option>
+              {carriers.map((carrier) => (
+                <option key={carrier} value={carrier}>
+                  {carrier}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="text"
+              placeholder="휴대폰번호"
+              className="input"
+              pattern="\d{10,11}"
+              maxLength={11}
+            />
+
+            <input
+              type="email"
+              placeholder="Email"
+              className="input col-span-2"
+            />
+          </div>
+
+          <p className="text-sm text-red-500">※ 본인 명의 휴대폰 아니면 불가</p>
+        </section>
+      )}
+      {custType === "개인사업자" && (
+        <section className="border p-4 rounded space-y-4">
+          <h2 className="text-lg font-semibold">개인사업자 정보</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <input type="text" placeholder="상호명" className="input" />
+            <input type="text" placeholder="대표자 성함" className="input" />
+            <input type="text" placeholder="주민번호" className="input" />
+            <input type="text" placeholder="사업자번호" className="input" />
+            <input type="text" placeholder="설치주소" className="input" />
+            <input type="text" placeholder="상세주소" className="input" />
+            <input type="text" placeholder="연락처" className="input" />
+            <input type="email" placeholder="Email" className="input" />
+          </div>
+        </section>
+      )}
+
+      {custType === "법인사업자" && (
+        <section className="border p-4 rounded space-y-4">
+          <h2 className="text-lg font-semibold">법인사업자 정보</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <input type="text" placeholder="상호명" className="input" />
+            <input type="text" placeholder="법인등록번호" className="input" />
+            <input type="text" placeholder="대표자 성함" className="input" />
+            <input
+              type="text"
+              placeholder="대표자 주민번호"
+              className="input"
+            />
+            <input type="text" placeholder="사업자번호" className="input" />
+            <input type="text" placeholder="설치주소" className="input" />
+            <input type="text" placeholder="상세주소" className="input" />
+            <input type="text" placeholder="연락처" className="input" />
+            <input type="email" placeholder="Email" className="input" />
+          </div>
+        </section>
+      )}
 
       <section className="space-y-4 border p-4 rounded-md">
         <h2 className="text-lg font-semibold">자동이체 정보</h2>
@@ -92,9 +260,13 @@ export default function InternetApplyForm() {
         {payType === "card" && (
           <div className="grid grid-cols-2 gap-4">
             <select className="input">
-              <option>카드사 선택</option>
-              <option>삼성카드</option>
-              <option>국민카드</option>
+              <option value="">카드 선택</option>
+
+              {cards.map((card) => (
+                <option key={card} value={card}>
+                  {card}
+                </option>
+              ))}
             </select>
             <input type="text" placeholder="카드번호" className="input" />
             <input
@@ -113,8 +285,11 @@ export default function InternetApplyForm() {
               onChange={(e) => setAccountBank(e.target.value)}
             >
               <option>은행 선택</option>
-              <option>국민은행</option>
-              <option>신한은행</option>
+              {banks.map((bank) => (
+                <option key={bank} value={bank}>
+                  {bank}
+                </option>
+              ))}
             </select>
             <input
               type="text"
@@ -135,14 +310,14 @@ export default function InternetApplyForm() {
       </section>
 
       <section className="space-y-4 border p-4 rounded-md">
-        <h2 className="text-lg font-semibold">사은품게좌</h2>
+        <h2 className="text-lg font-semibold">사은품계좌</h2>
 
         <div className="flex gap-4">
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={sameAsCustomer}
-              onChange={(e) => setSameAsCustomer(e.target.checked)}
+              onChange={(e) => handleSameAsCustomer(e.target.checked)}
             />
             고객명과 동일
           </label>
@@ -153,17 +328,17 @@ export default function InternetApplyForm() {
             type="text"
             placeholder="성함"
             className="input"
-            value={sameAsCustomer ? customerName : accountName}
-            disabled={sameAsCustomer}
-            onChange={(e) => setAccountName(e.target.value)}
+            value={giftAccountName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            readOnly={sameAsCustomer}
           />
           <input
             type="text"
             placeholder="주민번호"
             className="input"
-            value={sameAsCustomer ? customerRRN : accountRRN}
-            disabled={sameAsCustomer}
-            onChange={(e) => setAccountRRN(e.target.value)}
+            value={giftAccountRRN}
+            onChange={(e) => setGiftAccountRRN(e.target.value)}
+            readOnly={sameAsCustomer}
           />
         </div>
 
@@ -172,7 +347,7 @@ export default function InternetApplyForm() {
             <input
               type="checkbox"
               checked={sameAsAutoPay}
-              onChange={(e) => setSameAsAutoPay(e.target.checked)}
+              onChange={(e) => handleSameAsAutoPay(e.target.checked)}
             />
             자동이체자와 동일
           </label>
@@ -181,29 +356,32 @@ export default function InternetApplyForm() {
         <div className="grid grid-cols-2 gap-4">
           <select
             className="input"
+            value={giftAccountBank}
+            onChange={(e) => setGiftAccountBank(e.target.value)}
             disabled={sameAsAutoPay}
-            value={sameAsAutoPay ? accountBank : ""}
-            onChange={() => {}}
           >
             <option>은행 선택</option>
-            <option>국민은행</option>
-            <option>신한은행</option>
+            {banks.map((bank) => (
+              <option key={bank} value={bank}>
+                {bank}
+              </option>
+            ))}
           </select>
           <input
             type="text"
             placeholder="계좌번호"
             className="input"
-            value={sameAsAutoPay ? accountNumber : ""}
-            disabled={sameAsAutoPay}
-            onChange={() => {}}
+            value={giftAccountNumber}
+            onChange={(e) => setGiftAccountNumber(e.target.value)}
+            readOnly={sameAsAutoPay}
           />
           <input
             type="text"
             placeholder="예금주"
             className="input"
-            value={sameAsAutoPay ? accountName : ""}
-            disabled={sameAsAutoPay}
-            onChange={() => {}}
+            value={giftAccountName}
+            onChange={(e) => setGiftAccountName(e.target.value)}
+            readOnly={sameAsAutoPay}
           />
         </div>
       </section>
