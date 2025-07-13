@@ -14,6 +14,26 @@ type AddTvInfo = {
   setupBox: string;
 };
 
+type ApplyInfo = {
+  custType: "개인" | "개인사업자" | "법인사업자";
+  customerName: string;
+  customerRRNFront: string;
+  customerRRNBack: string;
+  postcode: string;
+  roadAddress: string;
+  detailAddress: string;
+  accountName: string;
+  accountBank: string;
+  accountNumber: string;
+  cardName: string;
+  cardNumber: string;
+  cardExpire: string;
+  giftAccountName: string;
+  giftAccountRRN: string;
+  giftAccountBank: string;
+  giftAccountNumber: string;
+};
+
 type ProductStore = {
   carrier: string;
   internet: SelectedProduct | null;
@@ -26,6 +46,8 @@ type ProductStore = {
   phoneNumber: string;
   addTv: AddTvInfo;
 
+  applyInfo: ApplyInfo;
+
   setCarrier: (carrier: string) => void;
   setInternet: (product: SelectedProduct | null) => void;
   setTv: (product: SelectedProduct | null) => void;
@@ -36,6 +58,8 @@ type ProductStore = {
   setPhoneCarrier: (carrier: string) => void;
   setPhoneNumber: (number: string) => void;
   setAddTv: (addTv: AddTvInfo) => void;
+
+  setApplyInfo: (info: ApplyInfo) => void;
 
   setProductInfo: (
     info: Omit<
@@ -50,6 +74,7 @@ type ProductStore = {
       | "setPhoneCarrier"
       | "setPhoneNumber"
       | "setAddTv"
+      | "setApplyInfo"
       | "setProductInfo"
     >
   ) => void;
@@ -70,6 +95,27 @@ export const useProductStore = create<ProductStore>((set) => ({
     count: "",
     setupBox: "",
   },
+
+  applyInfo: {
+    custType: "개인",
+    customerName: "",
+    customerRRNFront: "",
+    customerRRNBack: "",
+    postcode: "",
+    roadAddress: "",
+    detailAddress: "",
+    accountName: "",
+    accountBank: "",
+    accountNumber: "",
+    cardName: "",
+    cardNumber: "",
+    cardExpire: "",
+    giftAccountName: "",
+    giftAccountRRN: "",
+    giftAccountBank: "",
+    giftAccountNumber: "",
+  },
+
   setCarrier: (carrier) => set({ carrier }),
   setInternet: (product) => set({ internet: product }),
   setTv: (product) => set({ tv: product }),
@@ -80,6 +126,7 @@ export const useProductStore = create<ProductStore>((set) => ({
   setPhoneCarrier: (carrier) => set({ phoneCarrier: carrier }),
   setPhoneNumber: (number) => set({ phoneNumber: number }),
   setAddTv: (addTv) => set({ addTv }),
+  setApplyInfo: (info) => set({ applyInfo: info }),
 
   setProductInfo: (info) =>
     set({

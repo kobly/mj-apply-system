@@ -5,8 +5,36 @@ import { useRouter } from "next/navigation";
 import { banks } from "@/data/banks";
 import { cards } from "@/data/cards";
 import { carriers } from "@/data/carriers";
+import { useProductStore } from "@/stroe/useProductStore";
+
 export default function InternetApplyForm() {
   const router = useRouter();
+  const setApplyInfo = useProductStore((state) => state.setApplyInfo);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setApplyInfo({
+      custType,
+      customerName,
+      customerRRNFront,
+      customerRRNBack,
+      postcode,
+      roadAddress,
+      detailAddress,
+      accountName,
+      accountBank,
+      accountNumber,
+      giftAccountName,
+      giftAccountRRN,
+      giftAccountBank,
+      giftAccountNumber,
+      cardName,
+      cardNumber,
+      cardExpire,
+    });
+
+    router.push("/apply/internet/product");
+  };
 
   const [custType, setCustType] = useState<
     "개인" | "개인사업자" | "법인사업자"
@@ -20,6 +48,10 @@ export default function InternetApplyForm() {
   const [accountName, setAccountName] = useState("");
   const [accountBank, setAccountBank] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
+
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpire, setCardExpire] = useState("");
 
   const [giftAccountName, setGiftAccountName] = useState("");
 
@@ -79,11 +111,6 @@ export default function InternetApplyForm() {
   const handleSameAsAutoPay = (checked: boolean) => {
     setSameAsAutoPay(checked);
     if (checked) setSameAsCustomer(false);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    router.push("/apply/internet/product");
   };
 
   return (
@@ -259,20 +286,31 @@ export default function InternetApplyForm() {
 
         {payType === "card" && (
           <div className="grid grid-cols-2 gap-4">
-            <select className="input">
+            <select
+              className="input"
+              value={cardName}
+              onChange={(e) => setCardName(e.target.value)}
+            >
               <option value="">카드 선택</option>
-
               {cards.map((card) => (
                 <option key={card} value={card}>
                   {card}
                 </option>
               ))}
             </select>
-            <input type="text" placeholder="카드번호" className="input" />
+            <input
+              type="text"
+              placeholder="카드번호"
+              className="input"
+              value={cardNumber}
+              onChange={(e) => setCardNumber(e.target.value)}
+            />
             <input
               type="text"
               placeholder="유효기간 (MM/YY)"
               className="input"
+              value={cardExpire}
+              onChange={(e) => setCardExpire(e.target.value)}
             />
           </div>
         )}
@@ -390,6 +428,7 @@ export default function InternetApplyForm() {
         <button
           type="submit"
           className="bg-primary text-white px-6 py-2 rounded"
+          onClick={handleSubmit}
         >
           다음
         </button>

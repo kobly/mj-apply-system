@@ -39,6 +39,8 @@ export default function InternetProductTable() {
   const [addTvSetupBox, setAddTvSetupBox] = useState("");
 
   const { setProductInfo } = useProductStore();
+  const applyInfo = useProductStore((state) => state.applyInfo);
+  console.log(applyInfo);
   const router = useRouter();
 
   const handleNext = () => {
@@ -66,6 +68,7 @@ export default function InternetProductTable() {
         count: addTvCount,
         setupBox: addTvSetupBox,
       },
+      applyInfo: useProductStore.getState().applyInfo,
     });
 
     router.push("/apply/internet/product/summary");
